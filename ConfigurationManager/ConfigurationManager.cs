@@ -1,6 +1,8 @@
 ﻿// Made by MarC0 / ManlyMarco
 // Copyright 2018 GNU General Public License v3.0
 
+#pragma warning disable IDE0051 // Remove unused private members - Unity lifecycle method
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -62,7 +64,6 @@ namespace ConfigurationManager
         private List<PluginSettingsData> _filteredSetings = new List<PluginSettingsData>();
 
         internal Rect SettingWindowRect { get; private set; }
-        private Rect _screenRect;
         private Vector2 _settingWindowScrollPos;
         private int _tipsHeight;
 
@@ -70,6 +71,9 @@ namespace ConfigurationManager
         private PropertyInfo _curVisible;
         private int _previousCursorLockState;
         private bool _previousCursorVisible;
+
+        private bool _isResizing = false;
+        private Vector2 _resizeStart;
 
         internal static Texture2D TooltipBg { get; private set; }
         internal static Texture2D WindowBackground { get; private set; }
@@ -83,6 +87,13 @@ namespace ConfigurationManager
         private readonly ConfigEntry<KeyboardShortcut> _keybind;
         private readonly ConfigEntry<bool> _hideSingleSection;
         private readonly ConfigEntry<bool> _pluginConfigCollapsedDefault;
+
+        // Window size and position settings
+        private readonly ConfigEntry<int> _windowX;
+        private readonly ConfigEntry<int> _windowY;
+        private readonly ConfigEntry<int> _windowWidth;
+        private readonly ConfigEntry<int> _windowHeight;
+
         private bool _showDebug;
 
         /// <inheritdoc />
@@ -99,6 +110,12 @@ namespace ConfigurationManager
                                       "The key can be overridden by a game-specific plugin if necessary, in that case this setting is ignored."));
             _hideSingleSection = Config.Bind("General", "Hide single sections", false, new ConfigDescription("Show section title for plugins with only one section"));
             _pluginConfigCollapsedDefault = Config.Bind("General", "Plugin collapsed default", true, new ConfigDescription("If set to true plugins will be collapsed when opening the configuration manager window"));
+
+            _windowX = Config.Bind("Window", "X Position", -1);
+            _windowY = Config.Bind("Window", "Y Position", -1);
+            _windowWidth = Config.Bind("Window", "Width", 600);
+            _windowHeight = Config.Bind("Window", "Height", -1);
+
         }
 
         /// <summary>
@@ -133,6 +150,12 @@ namespace ConfigurationManager
                 {
                     if (!_previousCursorVisible || _previousCursorLockState != 0) // 0 = CursorLockMode.None
                         SetUnlockCursor(_previousCursorLockState, _previousCursorVisible);
+
+                    // Save the window size and position
+                    _windowX.Value = (int)SettingWindowRect.x;
+                    _windowY.Value = (int)SettingWindowRect.y;
+                    _windowWidth.Value = (int)SettingWindowRect.width;
+                    _windowHeight.Value = (int)SettingWindowRect.height;
                 }
 
                 DisplayingWindowChanged?.Invoke(this, new ValueChangedEventArgs<bool>(value));
@@ -246,13 +269,11 @@ namespace ConfigurationManager
 
         private void CalculateWindowRect()
         {
-            var width = Mathf.Min(Screen.width, 650);
-            var height = Screen.height < 560 ? Screen.height : Screen.height - 100;
-            var offsetX = Mathf.RoundToInt((Screen.width - width) / 2f);
-            var offsetY = Mathf.RoundToInt((Screen.height - height) / 2f);
+            var width = _windowWidth.Value > 0 ? _windowWidth.Value : Mathf.Min(Screen.width, 650);
+            var height = _windowHeight.Value > 0 ? _windowHeight.Value : (Screen.height < 560 ? Screen.height : Screen.height - 100);
+            var offsetX = _windowX.Value >= 0 ? _windowX.Value : Mathf.RoundToInt((Screen.width - width) / 2f);
+            var offsetY = _windowY.Value >= 0 ? _windowY.Value : Mathf.RoundToInt((Screen.height - height) / 2f);
             SettingWindowRect = new Rect(offsetX, offsetY, width, height);
-
-            _screenRect = new Rect(0, 0, Screen.width, Screen.height);
 
             LeftColumnWidth = Mathf.RoundToInt(SettingWindowRect.width / 2.5f);
             RightColumnWidth = (int)SettingWindowRect.width - LeftColumnWidth - 115;
@@ -264,16 +285,72 @@ namespace ConfigurationManager
             {
                 SetUnlockCursor(0, true);
 
-                if (GUI.Button(_screenRect, string.Empty, GUI.skin.box) &&
-                    !SettingWindowRect.Contains(Input.mousePosition))
-                    DisplayingWindow = false;
-
                 GUI.Box(SettingWindowRect, GUIContent.none, new GUIStyle { normal = new GUIStyleState { background = WindowBackground } });
 
-                GUILayout.Window(WindowId, SettingWindowRect, SettingsWindow, "Plugin / mod settings");
+                HandleWindowResize();
 
-                if (!SettingFieldDrawer.SettingKeyboardShortcut)
+                SettingWindowRect = GUILayout.Window(WindowId, SettingWindowRect, SettingsWindow, "Plugin / mod settings");
+
+                // Eat only left mouse click in the window
+                bool inWindow = SettingWindowRect.Contains(Event.current.mousePosition);
+                bool isClick = Input.GetMouseButton(0) && Input.GetMouseButtonDown(0);
+                if (!SettingFieldDrawer.SettingKeyboardShortcut && inWindow && isClick)
                     Input.ResetInputAxes();
+            }
+        }
+
+        private void HandleWindowResize()
+        {
+            const int resizeHandleSize = 30;
+            const int minWindowWidth = 200;
+            const int minWindowHeight = 100;
+
+            var resizeHandleRect = new Rect(
+                SettingWindowRect.x + SettingWindowRect.width - resizeHandleSize / 2,
+                SettingWindowRect.y + SettingWindowRect.height - resizeHandleSize / 2,
+                resizeHandleSize,
+                resizeHandleSize
+            );
+
+            var currentEvent = Event.current;
+            bool isHoveringResizeRect = resizeHandleRect.Contains(currentEvent.mousePosition);
+
+            if (isHoveringResizeRect)
+            {
+                GUI.Box(resizeHandleRect, "↘", new GUIStyle(GUI.skin.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontSize = 30
+                });
+            }
+            if (currentEvent.type == EventType.MouseDown && isHoveringResizeRect)
+            {
+                _isResizing = true;
+                _resizeStart = currentEvent.mousePosition;
+                currentEvent.Use();
+            }
+            else if (currentEvent.type == EventType.MouseUp && _isResizing)
+            {
+                _isResizing = false;
+                currentEvent.Use();
+            }
+            else if (currentEvent.type == EventType.MouseDrag && _isResizing)
+            {
+                var delta = currentEvent.mousePosition - _resizeStart;
+                var newWidth = Mathf.Max(minWindowWidth, SettingWindowRect.width + delta.x);
+                var newHeight = Mathf.Max(minWindowHeight, SettingWindowRect.height + delta.y);
+
+                SettingWindowRect = new Rect(
+                    SettingWindowRect.x,
+                    SettingWindowRect.y,
+                    newWidth,
+                    newHeight
+                );
+
+                LeftColumnWidth = Mathf.RoundToInt(newWidth / 2.5f);
+                RightColumnWidth = (int)newWidth - LeftColumnWidth - 115;
+                _resizeStart = currentEvent.mousePosition;
+                currentEvent.Use();
             }
         }
 
@@ -307,6 +384,17 @@ namespace ConfigurationManager
 
         private void SettingsWindow(int id)
         {
+            GUILayout.BeginArea(new Rect(SettingWindowRect.width - 27f, 1f, 25f, 21f));
+            if (GUILayout.Button("X"))
+            {
+                DisplayingWindow = false;
+            }
+            GUILayout.EndArea();
+
+            var titleBarRect = new Rect(0, 0, SettingWindowRect.width, 20);
+            GUI.DragWindow(titleBarRect);
+
+            GUILayout.Space(3);
             DrawWindowHeader();
 
             _settingWindowScrollPos = GUILayout.BeginScrollView(_settingWindowScrollPos, false, true);

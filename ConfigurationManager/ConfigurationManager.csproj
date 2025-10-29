@@ -43,8 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigSettingEntry.cs" />
-    <Compile Include="ConfigManagerSettings.cs" />
-    <Compile Include="UI\ConfigWindow.cs" />
+    <Compile Include="ManagerSettings.cs" />
+    <Compile Include="UI\ConfigWindow.Header.cs" />
+    <Compile Include="UI\ConfigWindow.Items.cs" />
+    <Compile Include="UI\ConfigWindow.Core.cs" />
     <Compile Include="PluginSettingsDataManager.cs" />
     <Compile Include="PluginSettingsData.cs" />
     <Compile Include="PropertySettingEntry.cs" />

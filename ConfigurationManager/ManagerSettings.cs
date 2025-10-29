@@ -6,7 +6,7 @@ namespace ConfigurationManager
     /// <summary>
     /// Manages all configuration settings for the Configuration Manager
     /// </summary>
-    internal class ConfigManagerSettings
+    internal class ManagerSettings
     {
         // Filtering settings
         public ConfigEntry<bool> ShowAdvanced { get; }
@@ -28,7 +28,7 @@ namespace ConfigurationManager
 
         public bool ShowDebug { get; set; }
 
-        public ConfigManagerSettings(ConfigFile config)
+        public ManagerSettings(ConfigFile config)
         {
             ShowAdvanced = config.Bind("Filtering", "Show advanced", false);
             ShowKeybinds = config.Bind("Filtering", "Show keybinds", true);

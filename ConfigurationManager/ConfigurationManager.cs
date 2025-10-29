@@ -31,8 +31,9 @@ namespace ConfigurationManager
         public const string Version = "17.0";
 
         internal static new ManualLogSource Logger;
+        internal static ConfigurationManager Instance;
 
-        private ConfigManagerSettings _settings;
+        private ManagerSettings _settings;
         private ConfigWindow _windowManager;
         private PluginSettingsDataManager _settingsDataManager;
         private CursorManager _cursorManager;
@@ -107,9 +108,10 @@ namespace ConfigurationManager
         private void Start()
         {
             Logger = base.Logger;
-            _settings = new ConfigManagerSettings(Config);
-            _windowManager = new ConfigWindow(_settings);
+            Instance = this;
+            _settings = new ManagerSettings(Config);
             _settingsDataManager = new PluginSettingsDataManager(_settings);
+            _windowManager = new ConfigWindow(_settings, _settingsDataManager);
             _cursorManager = new CursorManager();
             _windowManager.Initialize();
             _cursorManager.Initialize();
@@ -153,7 +155,7 @@ namespace ConfigurationManager
             if (DisplayingWindow)
             {
                 _cursorManager.SetUnlockCursor(0, true);
-                _windowManager.DrawWindow(_settingsDataManager);
+                _windowManager.DrawWindow();
             }
         }
     }

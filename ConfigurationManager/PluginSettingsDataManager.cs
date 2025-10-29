@@ -11,7 +11,7 @@ namespace ConfigurationManager
     /// </summary>
     internal class PluginSettingsDataManager
     {
-        private readonly ConfigManagerSettings _settings;
+        private readonly ManagerSettings _settings;
 
         private string _modsWithoutSettings;
         private List<SettingEntryBase> _allSettings;
@@ -40,7 +40,7 @@ namespace ConfigurationManager
             }
         }
 
-        public PluginSettingsDataManager(ConfigManagerSettings settings)
+        public PluginSettingsDataManager(ManagerSettings settings)
         {
             _settings = settings;
         }

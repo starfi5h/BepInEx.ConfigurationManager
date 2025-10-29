@@ -22,7 +22,6 @@ namespace ConfigurationManager
     /// https://github.com/ManlyMarco/BepInEx.ConfigurationManager
     /// </summary>
     [BepInPlugin(GUID, "Configuration Manager", Version)]
-    [Browsable(false)]
     public class ConfigurationManager : BaseUnityPlugin
     {
         /// <summary>
@@ -42,7 +41,6 @@ namespace ConfigurationManager
         private const int WindowId = -68;
 
         private const string SearchBoxName = "searchBox";
-        private bool _focusSearchBox;
         private string _searchString = string.Empty;
 
         /// <summary>
@@ -88,6 +86,10 @@ namespace ConfigurationManager
         private readonly ConfigEntry<bool> _hideSingleSection;
         private readonly ConfigEntry<bool> _pluginConfigCollapsedDefault;
 
+        // UI color and font size
+        private readonly ConfigEntry<Color> _backgroundColor;
+        private readonly ConfigEntry<int> _fontSize;
+
         // Window size and position settings
         private readonly ConfigEntry<int> _windowX;
         private readonly ConfigEntry<int> _windowY;
@@ -110,6 +112,9 @@ namespace ConfigurationManager
                                       "The key can be overridden by a game-specific plugin if necessary, in that case this setting is ignored."));
             _hideSingleSection = Config.Bind("General", "Hide single sections", false, new ConfigDescription("Show section title for plugins with only one section"));
             _pluginConfigCollapsedDefault = Config.Bind("General", "Plugin collapsed default", true, new ConfigDescription("If set to true plugins will be collapsed when opening the configuration manager window"));
+
+            _backgroundColor = Config.Bind("UI", "Background color", new Color(0f, 0f, 0f, 0.75f));
+            _fontSize = Config.Bind("UI", "Font size", 14, new ConfigDescription("", new AcceptableValueRange<int>(9, 40)));
 
             _windowX = Config.Bind("Window", "X Position", -1);
             _windowY = Config.Bind("Window", "Y Position", -1);
@@ -136,8 +141,6 @@ namespace ConfigurationManager
                     CalculateWindowRect();
 
                     BuildSettingList();
-
-                    _focusSearchBox = true;
 
                     // Do through reflection for unity 4 compat
                     if (_curLockState != null)
@@ -470,16 +473,6 @@ namespace ConfigurationManager
             GUILayout.BeginHorizontal();
             {
                 GUILayout.Label("Tip: Click plugin names to expand. Click setting and group names to see their descriptions.");
-
-                GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button(_pluginConfigCollapsedDefault.Value ? "Expand" : "Collapse", GUILayout.ExpandWidth(false)))
-                {
-                    var newValue = !_pluginConfigCollapsedDefault.Value;
-                    _pluginConfigCollapsedDefault.Value = newValue;
-                    foreach (var plugin in _filteredSetings)
-                        plugin.Collapsed = newValue;
-                }
             }
             GUILayout.EndHorizontal();
         }
@@ -525,11 +518,7 @@ namespace ConfigurationManager
                     BuildSettingList();
                 }
 
-                if (GUILayout.Button("Log", GUILayout.ExpandWidth(false)))
-                {
-                    try { Utils.OpenLog(); }
-                    catch (SystemException ex) { Logger.Log(LogLevel.Message | LogLevel.Error, ex.Message); }
-                }
+
             }
             GUILayout.EndHorizontal();
 
@@ -540,15 +529,28 @@ namespace ConfigurationManager
                 GUI.SetNextControlName(SearchBoxName);
                 SearchString = GUILayout.TextField(SearchString, GUILayout.ExpandWidth(true));
 
-                if (_focusSearchBox)
-                {
-                    GUI.FocusWindow(WindowId);
-                    GUI.FocusControl(SearchBoxName);
-                    _focusSearchBox = false;
-                }
-
                 if (GUILayout.Button("Clear", GUILayout.ExpandWidth(false)))
                     SearchString = string.Empty;
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal(GUI.skin.box);
+            {
+                if (_showDebug && GUILayout.Button("Open Unity Log", GUILayout.ExpandWidth(false)))
+                {
+                    try { Utils.OpenLog(); }
+                    catch (SystemException ex) { Logger.Log(LogLevel.Message | LogLevel.Error, ex.Message); }
+                }
+                
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button(_pluginConfigCollapsedDefault.Value ? "Expand All" : "Collapse All", GUILayout.ExpandWidth(false)))
+                {
+                    var newValue = !_pluginConfigCollapsedDefault.Value;
+                    _pluginConfigCollapsedDefault.Value = newValue;
+                    foreach (var plugin in _filteredSetings)
+                        plugin.Collapsed = newValue;
+                }
             }
             GUILayout.EndHorizontal();
         }
@@ -609,6 +611,7 @@ namespace ConfigurationManager
             {
                 foreach (var category in plugin.Categories)
                 {
+                    GUILayout.BeginVertical(GUI.skin.box);
                     if (!string.IsNullOrEmpty(category.Name))
                     {
                         if (plugin.Categories.Count > 1 || !_hideSingleSection.Value)
@@ -620,6 +623,7 @@ namespace ConfigurationManager
                         DrawSingleSetting(setting);
                         GUILayout.Space(2);
                     }
+                    GUILayout.EndVertical();
                 }
             }
 
@@ -689,7 +693,7 @@ namespace ConfigurationManager
             TooltipBg = background;
 
             var windowBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-            windowBackground.SetPixel(0, 0, new Color(0.5f, 0.5f, 0.5f, 1));
+            windowBackground.SetPixel(0, 0, _backgroundColor.Value);
             windowBackground.Apply();
             WindowBackground = windowBackground;
 

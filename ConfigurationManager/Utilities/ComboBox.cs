@@ -3,6 +3,7 @@
 // this oop version of ComboBox is refactored by zhujiangbo jumbozhu@gmail.com
 // Modified by MarC0 / ManlyMarco
 
+using ConfigurationManager.UI;
 using System;
 using UnityEngine;
 
@@ -97,7 +98,7 @@ namespace ConfigurationManager.Utilities
                     var outerRectLocal = new Rect(scrpos.x, scrpos.y, outerRectScreen.width, outerRectScreen.height);
 
                     GUI.Box(outerRectLocal, GUIContent.none,
-                        new GUIStyle { normal = new GUIStyleState { background = ConfigurationManager.WindowBackground } });
+                        new GUIStyle { normal = new GUIStyleState { background = ConfigWindow.WindowBackground } });
 
                     _scrollPosition = GUI.BeginScrollView(outerRectLocal, _scrollPosition, innerRect, false, false);
                     {

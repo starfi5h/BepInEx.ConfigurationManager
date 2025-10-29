@@ -1,6 +1,7 @@
 ﻿// Made by MarC0 / ManlyMarco
 // Copyright 2018 GNU General Public License v3.0
 
+using ConfigurationManager.UI;
 using ConfigurationManager.Utilities;
 using System;
 using System.Collections;
@@ -21,7 +22,7 @@ namespace ConfigurationManager
         private static readonly Dictionary<SettingEntryBase, ComboBox> _comboBoxCache = new Dictionary<SettingEntryBase, ComboBox>();
         private static readonly Dictionary<SettingEntryBase, ColorCacheEntry> _colorCache = new Dictionary<SettingEntryBase, ColorCacheEntry>();
 
-        private readonly ConfigurationManager _instance;
+        private readonly ConfigWindow _instance;
 
         private static SettingEntryBase _currentKeyboardShortcutToSet;
         public static bool SettingKeyboardShortcut => _currentKeyboardShortcutToSet != null;
@@ -40,7 +41,7 @@ namespace ConfigurationManager
             };
         }
 
-        public SettingFieldDrawer(ConfigurationManager instance)
+        public SettingFieldDrawer(ConfigWindow instance)
         {
             _instance = instance;
         }

@@ -36,7 +36,7 @@ namespace ConfigurationManager.UI
                 }
 
                 var origColor = GUI.color;
-                GUI.color = AdvancedSettingColor;
+                GUI.color = _settings.AdvancedSettingColor.Value;
                 newVal = GUILayout.Toggle(_settings.ShowAdvanced.Value, "Advanced settings");
                 if (_settings.ShowAdvanced.Value != newVal)
                 {
@@ -75,6 +75,15 @@ namespace ConfigurationManager.UI
                 if (_settings.ShowDebug && GUILayout.Button("Open Unity Log", GUILayout.ExpandWidth(false)))
                 {
                     try { Utils.OpenLog(); }
+                    catch (SystemException ex)
+                    {
+                        ConfigurationManager.Logger.Log(LogLevel.Message | LogLevel.Error, ex.Message);
+                    }
+                }
+
+                if (_settings.ShowDebug && GUILayout.Button("Open BepInEx Log", GUILayout.ExpandWidth(false)))
+                {
+                    try { Utils.OpenBepInExLog(); }
                     catch (SystemException ex)
                     {
                         ConfigurationManager.Logger.Log(LogLevel.Message | LogLevel.Error, ex.Message);

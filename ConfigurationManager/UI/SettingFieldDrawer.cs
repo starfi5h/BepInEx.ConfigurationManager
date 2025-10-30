@@ -83,39 +83,15 @@ namespace ConfigurationManager
             GUILayout.EndHorizontal();
         }
 
-        private static GUIStyle _categoryHeaderSkin;
         public static void DrawCategoryHeader(string text)
         {
-            if (_categoryHeaderSkin == null)
-            {
-                _categoryHeaderSkin = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.UpperCenter,
-                    wordWrap = true,
-                    stretchWidth = true,
-                    fontSize = 14
-                };
-            }
-
-            GUILayout.Label(text, _categoryHeaderSkin);
+            GUILayout.Label(text, StyleManager.HeaderStyle);
         }
 
-        private static GUIStyle _pluginHeaderSkin;
         public static bool DrawPluginHeader(GUIContent content, bool isCollapsed)
         {
-            if (_pluginHeaderSkin == null)
-            {
-                _pluginHeaderSkin = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.UpperCenter,
-                    wordWrap = true,
-                    stretchWidth = true,
-                    fontSize = 15
-                };
-            }
-
             if (isCollapsed) content.text += "\n...";
-            return GUILayout.Button(content, _pluginHeaderSkin, GUILayout.ExpandWidth(true));
+            return GUILayout.Button(content, StyleManager.HeaderStyle, GUILayout.ExpandWidth(true));
         }
 
         public static bool DrawCurrentDropdown()

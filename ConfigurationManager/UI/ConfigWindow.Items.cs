@@ -171,11 +171,11 @@ namespace ConfigurationManager.UI
             if (setting.HideSettingName) return;
 
             var origColor = GUI.color;
-            if (setting.IsAdvanced == true)
-                GUI.color = AdvancedSettingColor;
+            if (setting.IsAdvanced)
+                GUI.color = _settings.AdvancedSettingColor.Value;
 
             GUILayout.Label(new GUIContent(setting.DispName.TrimStart('!'), setting.Description),
-                GUILayout.Width(LeftColumnWidth), GUILayout.MaxWidth(LeftColumnWidth));
+                GUILayout.Width(LeftColumnWidth - 20), GUILayout.MaxWidth(LeftColumnWidth));
 
             GUI.color = origColor;
         }

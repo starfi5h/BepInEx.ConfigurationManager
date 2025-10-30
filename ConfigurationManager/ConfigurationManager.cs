@@ -113,7 +113,6 @@ namespace ConfigurationManager
             _settingsDataManager = new PluginSettingsDataManager(_settings);
             _windowManager = new ConfigWindow(_settings, _settingsDataManager);
             _cursorManager = new CursorManager();
-            _windowManager.Initialize();
             _cursorManager.Initialize();
 
             // Check if user has permissions to write config files to disk
@@ -158,5 +157,13 @@ namespace ConfigurationManager
                 _windowManager.DrawWindow();
             }
         }
+
+#if DEBUG
+        private void OnDestroy()
+        {
+            StyleManager.CleanCache();
+        }
+#endif
+
     }
 }

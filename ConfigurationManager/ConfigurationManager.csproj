@@ -51,6 +51,7 @@
     <Compile Include="PluginSettingsData.cs" />
     <Compile Include="PropertySettingEntry.cs" />
     <Compile Include="SettingSearcher.cs" />
+    <Compile Include="UI\StyleManager.cs" />
     <Compile Include="UI\WindowResizeHandler.cs" />
     <Compile Include="Utilities\ComboBox.cs" />
     <Compile Include="ConfigurationManager.cs" />

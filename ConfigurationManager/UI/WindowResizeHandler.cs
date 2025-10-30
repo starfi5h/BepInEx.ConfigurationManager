@@ -35,11 +35,7 @@ namespace ConfigurationManager.UI
 
             if (isHoveringResizeRect)
             {
-                GUI.Box(resizeHandleRect, "↘", new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 30
-                });
+                GUI.Box(resizeHandleRect, "↘", StyleManager.ResizeHandleStyle);
             }
 
             if (currentEvent.type == EventType.MouseDown && isHoveringResizeRect)

@@ -94,7 +94,7 @@ namespace ConfigurationManager
         /// <summary>
         /// Is this setting advanced
         /// </summary>
-        public bool? IsAdvanced { get; internal set; }
+        public bool IsAdvanced { get; internal set; }
 
         /// <summary>
         /// Order of the setting on the settings list relative to other settings in a category. 0 by default, lower is higher on the list.

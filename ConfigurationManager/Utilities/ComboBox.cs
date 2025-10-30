@@ -97,8 +97,7 @@ namespace ConfigurationManager.Utilities
                     var scrpos = GUIUtility.ScreenToGUIPoint(location);
                     var outerRectLocal = new Rect(scrpos.x, scrpos.y, outerRectScreen.width, outerRectScreen.height);
 
-                    GUI.Box(outerRectLocal, GUIContent.none,
-                        new GUIStyle { normal = new GUIStyleState { background = ConfigWindow.WindowBackground } });
+                    GUI.Box(outerRectLocal, GUIContent.none, StyleManager.DropdownBackgroundStyle);
 
                     _scrollPosition = GUI.BeginScrollView(outerRectLocal, _scrollPosition, innerRect, false, false);
                     {

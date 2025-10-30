@@ -10,8 +10,7 @@ namespace ConfigurationManager.UI
     /// </summary>
     internal partial class ConfigWindow
     {
-        private const int WindowId = -68;        
-        private static readonly Color AdvancedSettingColor = new Color(1f, 0.95f, 0.67f, 1f);
+        private const int WindowId = -68;
 
         private readonly ManagerSettings _settings;
         private readonly PluginSettingsDataManager _dataManager;
@@ -21,8 +20,6 @@ namespace ConfigurationManager.UI
         internal Rect SettingWindowRect { get; private set; }
         internal int LeftColumnWidth { get; private set; }
         internal int RightColumnWidth { get; private set; }
-        internal static Texture2D TooltipBg { get; private set; }
-        internal static Texture2D WindowBackground { get; private set; }
 
 
         public ConfigWindow(ManagerSettings settings, PluginSettingsDataManager dataManager)
@@ -31,22 +28,6 @@ namespace ConfigurationManager.UI
             _dataManager = dataManager;
             _resizeHandler = new WindowResizeHandler();
             _fieldDrawer = new SettingFieldDrawer(this);
-        }
-
-        /// <summary>
-        /// Initialize textures and resources
-        /// </summary>
-        public void Initialize()
-        {
-            var background = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-            background.SetPixel(0, 0, Color.black);
-            background.Apply();
-            TooltipBg = background;
-
-            var windowBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-            windowBackground.SetPixel(0, 0, _settings.BackgroundColor.Value);
-            windowBackground.Apply();
-            WindowBackground = windowBackground;
         }
 
         /// <summary>
@@ -73,14 +54,22 @@ namespace ConfigurationManager.UI
         /// </summary>
         public void DrawWindow()
         {
-            GUI.Box(SettingWindowRect, GUIContent.none,
-                new GUIStyle { normal = new GUIStyleState { background = WindowBackground } });
+            if (_settings.IsWindowChanged)
+            {
+                CalculateWindowRect();
+                _settings.IsWindowChanged = false;
+            }
+
+            StyleManager.CreateStyles(_settings);
+            var previousSkin = GUI.skin;
+            GUI.skin = StyleManager.CustomSkin;
+            GUI.Box(SettingWindowRect, GUIContent.none, StyleManager.WindowStyle);
 
             SettingWindowRect = _resizeHandler.HandleWindowResize(SettingWindowRect, out var columnWidthsChanged);
 
             if (columnWidthsChanged)
             {
-                LeftColumnWidth = Mathf.RoundToInt(SettingWindowRect.width / 2.5f);
+                LeftColumnWidth = Mathf.RoundToInt(SettingWindowRect.width * _settings.ColumnLeftRatio.Value);
                 RightColumnWidth = (int)SettingWindowRect.width - LeftColumnWidth - 115;
             }
 
@@ -92,6 +81,8 @@ namespace ConfigurationManager.UI
             bool isClick = Input.GetMouseButton(0) && Input.GetMouseButtonDown(0);
             if (!SettingFieldDrawer.SettingKeyboardShortcut && inWindow && isClick)
                 Input.ResetInputAxes();
+
+            GUI.skin = previousSkin;
         }
 
         private void CalculateWindowRect()
@@ -102,7 +93,7 @@ namespace ConfigurationManager.UI
             var offsetY = _settings.WindowY.Value >= 0 ? _settings.WindowY.Value : Mathf.RoundToInt((Screen.height - height) / 2f);
             SettingWindowRect = new Rect(offsetX, offsetY, width, height);
 
-            LeftColumnWidth = Mathf.RoundToInt(SettingWindowRect.width / 2.5f);
+            LeftColumnWidth = Mathf.RoundToInt(SettingWindowRect.width * _settings.ColumnLeftRatio.Value);
             RightColumnWidth = (int)SettingWindowRect.width - LeftColumnWidth - 115;
         }
 
@@ -120,10 +111,13 @@ namespace ConfigurationManager.UI
             var titleBarRect = new Rect(0, 0, SettingWindowRect.width, 20);
             GUI.DragWindow(titleBarRect);
 
+            var previousColor = GUI.color;
+            GUI.color = _settings.FontColor.Value;
             GUILayout.Space(3);
             DrawWindowHeader(); // ConfigWindow.Header.cs
 
             DrawScrollItems(); // ConfigWindow.Items.cs
+            GUI.color = previousColor;
 
             if (!SettingFieldDrawer.DrawCurrentDropdown())
                 DrawTooltip(SettingWindowRect);
@@ -135,12 +129,7 @@ namespace ConfigurationManager.UI
             {
                 var currentEvent = Event.current;
 
-                var style = new GUIStyle
-                {
-                    normal = new GUIStyleState { textColor = Color.white, background = TooltipBg },
-                    wordWrap = true,
-                    alignment = TextAnchor.MiddleCenter
-                };
+                var style = StyleManager.TooltipStyle;
 
                 const int width = 400;
                 var height = style.CalcHeight(new GUIContent(GUI.tooltip), 400) + 10;

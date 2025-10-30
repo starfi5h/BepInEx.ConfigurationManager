@@ -26,11 +26,6 @@ namespace ConfigurationManager
         /// </summary>
         public int Height { get; set; }
 
-        /// <summary>
-        /// Plugin website URL if available
-        /// </summary>
-        public string Website { get; set; }
-
         private bool _collapsed;
 
         /// <summary>

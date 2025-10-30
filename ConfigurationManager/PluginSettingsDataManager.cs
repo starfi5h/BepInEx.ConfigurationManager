@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BepInEx.Configuration;
-using ConfigurationManager.Utilities;
+using UnityEngine;
 
 namespace ConfigurationManager
 {
@@ -55,7 +56,15 @@ namespace ConfigurationManager
             _modsWithoutSettings = string.Join(", ", modsWithoutSettings.Select(x => x.TrimStart('!')).OrderBy(x => x).ToArray());
             _allSettings = results.ToList();
 
-            BuildFilteredSettingList();
+            _ = BuildFilteredSettingListAsync();
+        }
+
+        public async Task BuildFilteredSettingListAsync()
+        {
+            await Task.Run(() =>
+            {
+                BuildFilteredSettingList();
+            });
         }
 
         /// <summary>
@@ -67,18 +76,16 @@ namespace ConfigurationManager
 
             var searchStrings = SearchString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
+            if (!_settings.ShowAdvanced.Value)
+                results = results.Where(x => x.IsAdvanced != true);
+            if (!_settings.ShowKeybinds.Value)
+                results = results.Where(x => !IsKeyboardShortcut(x));
+            if (!_settings.ShowSettings.Value)
+                results = results.Where(x => x.IsAdvanced == true || IsKeyboardShortcut(x));
+
             if (searchStrings.Length > 0)
             {
                 results = results.Where(x => ContainsSearchString(x, searchStrings));
-            }
-            else
-            {
-                if (!_settings.ShowAdvanced.Value)
-                    results = results.Where(x => x.IsAdvanced != true);
-                if (!_settings.ShowKeybinds.Value)
-                    results = results.Where(x => !IsKeyboardShortcut(x));
-                if (!_settings.ShowSettings.Value)
-                    results = results.Where(x => x.IsAdvanced == true || IsKeyboardShortcut(x));
             }
 
             var settingsAreCollapsed = _settings.PluginConfigCollapsedDefault.Value;
@@ -96,11 +103,15 @@ namespace ConfigurationManager
                 .GroupBy(x => x.PluginInfo)
                 .Select(pluginSettings =>
                 {
-                    var originalCategoryOrder = pluginSettings.Select(x => x.Category).Distinct().ToList();
+                    var categoryOrder = pluginSettings
+                        .Select(x => x.Category)
+                        .Distinct()
+                        .Select((category, index) => new { category, index })
+                        .ToDictionary(pair => pair.category, pair => pair.index);
 
                     var categories = pluginSettings
                         .GroupBy(x => x.Category)
-                        .OrderBy(x => originalCategoryOrder.IndexOf(x.Key))
+                        .OrderBy(x => categoryOrder.TryGetValue(x.Key, out var index) ? index : int.MaxValue)
                         .ThenBy(x => x.Key)
                         .Select(x => new PluginSettingsData.PluginSettingsGroupData
                         {
@@ -108,16 +119,13 @@ namespace ConfigurationManager
                             Settings = x.OrderByDescending(set => set.Order).ThenBy(set => set.DispName).ToList()
                         });
 
-                    var website = Utils.GetWebsite(pluginSettings.First().PluginInstance);
-
                     return new PluginSettingsData
                     {
                         Info = pluginSettings.Key,
                         Categories = categories.ToList(),
                         Collapsed = nonDefaultCollapsingStateByPluginName.Contains(pluginSettings.Key.Name)
                             ? !settingsAreCollapsed
-                            : settingsAreCollapsed,
-                        Website = website
+                            : settingsAreCollapsed
                     };
                 })
                 .OrderBy(x => x.Info.Name)
@@ -126,20 +134,29 @@ namespace ConfigurationManager
 
         private static bool IsKeyboardShortcut(SettingEntryBase x)
         {
-            return x.SettingType == typeof(KeyboardShortcut);
+            return x.SettingType == typeof(KeyboardShortcut) || x.SettingType == typeof(KeyCode);
         }
 
         private static bool ContainsSearchString(SettingEntryBase setting, string[] searchStrings)
         {
-            var combinedSearchTarget = setting.PluginInfo.Name + "\n" +
-                                       setting.PluginInfo.GUID + "\n" +
-                                       setting.DispName + "\n" +
-                                       setting.Category + "\n" +
-                                       setting.Description + "\n" +
-                                       setting.DefaultValue + "\n" +
-                                       setting.Get();
+            //  helper function to avoid repeating the check
+            bool Check(string target, string s) =>
+                target != null && target.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) >= 0;
 
-            return searchStrings.All(s => combinedSearchTarget.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) >= 0);
+            foreach (var s in searchStrings)
+            {
+                bool found = Check(setting.PluginInfo.Name, s) ||
+                             Check(setting.PluginInfo.GUID, s) ||
+                             Check(setting.DispName, s) ||
+                             Check(setting.Category, s) ||
+                             Check(setting.Description, s) ||
+                             Check(setting.DefaultValue?.ToString(), s) ||
+                             Check(setting.Get()?.ToString(), s);
+
+                if (!found)
+                    return false;
+            }
+            return true;
         }
     }
 }

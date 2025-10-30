@@ -19,20 +19,18 @@ namespace ConfigurationManager.UI
             {
                 GUILayout.Label("Show: ", GUILayout.ExpandWidth(false));
 
-                GUI.enabled = _dataManager.SearchString == string.Empty;
-
                 var newVal = GUILayout.Toggle(_settings.ShowSettings.Value, "Normal settings");
                 if (_settings.ShowSettings.Value != newVal)
                 {
                     _settings.ShowSettings.Value = newVal;
-                    _dataManager.BuildFilteredSettingList();
+                    _ = _dataManager.BuildFilteredSettingListAsync();
                 }
 
                 newVal = GUILayout.Toggle(_settings.ShowKeybinds.Value, "Keyboard shortcuts");
                 if (_settings.ShowKeybinds.Value != newVal)
                 {
                     _settings.ShowKeybinds.Value = newVal;
-                    _dataManager.BuildFilteredSettingList();
+                    _ = _dataManager.BuildFilteredSettingListAsync();
                 }
 
                 var origColor = GUI.color;
@@ -41,11 +39,9 @@ namespace ConfigurationManager.UI
                 if (_settings.ShowAdvanced.Value != newVal)
                 {
                     _settings.ShowAdvanced.Value = newVal;
-                    _dataManager.BuildFilteredSettingList();
+                    _ = _dataManager.BuildFilteredSettingListAsync();
                 }
                 GUI.color = origColor;
-
-                GUI.enabled = true;
 
                 newVal = GUILayout.Toggle(_settings.ShowDebug, "Debug mode");
                 if (_settings.ShowDebug != newVal)

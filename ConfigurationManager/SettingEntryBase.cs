@@ -43,7 +43,7 @@ namespace ConfigurationManager
         /// <summary>
         /// Category the setting is under. Null to be directly under the plugin.
         /// </summary>
-        public string Category { get; protected set; }
+        public virtual string Category { get; protected internal set; }
 
         /// <summary>
         /// If set, a "Default" button will be shown next to the setting to allow resetting to default.

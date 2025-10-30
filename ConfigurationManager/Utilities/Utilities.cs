@@ -67,9 +67,17 @@ namespace ConfigurationManager.Utilities
             tex.Apply(false);
         }
 
+        public static bool TryReloadConfig(string guid)
+        {
+            if (!Chainloader.PluginInfos.TryGetValue(guid, out var pluginInfo)) return false;
+            pluginInfo.Instance?.Config.Reload();
+            ConfigurationManager.Logger.LogDebug("Reload " + pluginInfo.Instance);
+            return pluginInfo.Instance != null;
+        }
+
         public static bool TryOpenFile(string path)
         {
-            if (string.IsNullOrEmpty(path)) return false;
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return false;
             try
             {
                 Application.OpenURL(path);
@@ -84,8 +92,7 @@ namespace ConfigurationManager.Utilities
         public static void OpenBepInExLog()
         {
             string logFilePath = Path.Combine(Paths.BepInExRootPath, "LogOutput.log");
-            if (File.Exists(logFilePath))
-                TryOpenFile(logFilePath);
+            TryOpenFile(logFilePath);
         }
 
         public static void OpenLog()
@@ -125,43 +132,6 @@ namespace ConfigurationManager.Utilities
             if (TryOpenFile(latestLog)) return;
 
             throw new FileNotFoundException("No log files were found");
-        }
-
-        public static string GetWebsite(BaseUnityPlugin bepInPlugin)
-        {
-            if (bepInPlugin == null) return null;
-            try
-            {
-                var fileName = bepInPlugin.GetType().Assembly.Location;
-                if (!File.Exists(fileName)) return null;
-                var fi = FileVersionInfo.GetVersionInfo(fileName);
-                return new[]
-                {
-                    fi.CompanyName,
-                    fi.FileDescription,
-                    fi.Comments,
-                    fi.LegalCopyright,
-                    fi.LegalTrademarks
-                }.FirstOrDefault(x => Uri.IsWellFormedUriString(x, UriKind.Absolute));
-            }
-            catch (Exception e)
-            {
-                ConfigurationManager.Logger.LogWarning($"Failed to get URI for {bepInPlugin?.Info?.Metadata?.Name} - {e.Message}");
-                return null;
-            }
-        }
-
-        public static void OpenWebsite(string url)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(url)) throw new Exception("Empty URL");
-                Process.Start(url);
-            }
-            catch (Exception ex)
-            {
-                ConfigurationManager.Logger.Log(LogLevel.Message | LogLevel.Warning, $"Failed to open URL {url}\nCause: {ex.Message}");
-            }
         }
     }
 }

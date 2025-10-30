@@ -2,6 +2,8 @@
 // Copyright 2018 GNU General Public License v3.0
 
 using System;
+using System.IO;
+using BepInEx;
 using BepInEx.Logging;
 using ConfigurationManager.Utilities;
 using UnityEngine;
@@ -103,25 +105,22 @@ namespace ConfigurationManager.UI
             var isSearching = !string.IsNullOrEmpty(searchString);
 
             {
-                var hasWebsite = plugin.Website != null;
-                if (hasWebsite)
-                {
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Space(29); // Same as the URL button to keep the plugin name centered
-                }
+                GUILayout.BeginHorizontal();
+                var origColor = GUI.color;
+                GUI.color = Color.gray;
+                if (GUILayout.Button(new GUIContent("Reload", "Trigger Config.Reload() event to apply settings from the config file"), GUI.skin.label, GUILayout.ExpandWidth(false)))
+                    Utils.TryReloadConfig(plugin.Info.GUID);
+                GUI.color = origColor;
 
                 if (SettingFieldDrawer.DrawPluginHeader(categoryHeader, plugin.Collapsed && !isSearching) && !isSearching)
                     plugin.Collapsed = !plugin.Collapsed;
 
-                if (hasWebsite)
-                {
-                    var origColor = GUI.color;
-                    GUI.color = Color.gray;
-                    if (GUILayout.Button(new GUIContent("URL", plugin.Website), GUI.skin.label, GUILayout.ExpandWidth(false)))
-                        Utils.OpenWebsite(plugin.Website);
-                    GUI.color = origColor;
-                    GUILayout.EndHorizontal();
-                }
+                
+                GUI.color = Color.gray;
+                if (GUILayout.Button(new GUIContent("Open", "Open the plugin config file"), GUI.skin.label, GUILayout.ExpandWidth(false)))
+                    Utils.TryOpenFile(Path.Combine(Paths.ConfigPath, plugin.Info.GUID + ".cfg"));
+                GUI.color = origColor;
+                GUILayout.EndHorizontal();
             }
 
             if (isSearching || !plugin.Collapsed)

@@ -20,6 +20,11 @@ namespace ConfigurationManager
         public object Instance { get; internal set; }
         public PropertyInfo Property { get; internal set; }
 
+        public override string Category
+        {
+            get => base.Category;
+            protected internal set => base.Category = value;
+        }
         public override string DispName
         {
             get => string.IsNullOrEmpty(base.DispName) ? Property.Name : base.DispName;

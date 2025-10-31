@@ -1,5 +1,6 @@
 ﻿// Localization System for ConfigurationManager
 // Simplified version: English and Simplified Chinese only
+#pragma warning disable CS1591
 
 using System.Collections.Generic;
 

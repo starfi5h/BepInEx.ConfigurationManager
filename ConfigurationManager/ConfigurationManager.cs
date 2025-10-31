@@ -17,18 +17,12 @@ namespace ConfigurationManager
     /// The user can change any of the settings you expose, even keyboard shortcuts.
     /// https://github.com/ManlyMarco/BepInEx.ConfigurationManager
     /// </summary>
-    [BepInPlugin(GUID, "Configuration Manager", Version)]
+    [BepInPlugin(GUID, Name, Version)]
     public class ConfigurationManager : BaseUnityPlugin
     {
-        /// <summary>
-        /// GUID of this plugin
-        /// </summary>
-        public const string GUID = "com.bepis.bepinex.configurationmanager";
-
-        /// <summary>
-        /// Version constant
-        /// </summary>
-        public const string Version = "17.0";
+        internal const string GUID = "com.bepis.bepinex.configurationmanager";
+        internal const string Name = "Configuration Manager";
+        internal const string Version = "1.0.0";
 
         internal static new ManualLogSource Logger;
         internal static ConfigurationManager Instance;

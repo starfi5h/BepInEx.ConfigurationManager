@@ -1,6 +1,7 @@
 ﻿// Made by MarC0 / ManlyMarco
 // Copyright 2018 GNU General Public License v3.0
 
+using ConfigurationManager.Utilities;
 using UnityEngine;
 
 namespace ConfigurationManager.UI
@@ -74,7 +75,7 @@ namespace ConfigurationManager.UI
             }
 
             SettingWindowRect = GUILayout.Window(WindowId, SettingWindowRect,
-                DrawSettingsWindow, "Plugin / mod settings");
+                DrawSettingsWindow, "Plugin / mod settings".Translate());
 
             // Eat only left mouse click in the window
             bool inWindow = SettingWindowRect.Contains(Event.current.mousePosition);

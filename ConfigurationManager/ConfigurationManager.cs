@@ -114,6 +114,7 @@ namespace ConfigurationManager
             _windowManager = new ConfigWindow(_settings, _settingsDataManager);
             _cursorManager = new CursorManager();
             _cursorManager.Initialize();
+            LocalizationManager.CurrentLanguage = _settings.Language.Value;
 
             // Check if user has permissions to write config files to disk
             try

@@ -1,5 +1,6 @@
 ﻿using BepInEx.Configuration;
 using ConfigurationManager.UI;
+using ConfigurationManager.Utilities;
 using UnityEngine;
 
 namespace ConfigurationManager
@@ -16,6 +17,7 @@ namespace ConfigurationManager
         public ConfigEntry<KeyboardShortcut> Keybind { get; }
         public ConfigEntry<bool> HideSingleSection { get; }
         public ConfigEntry<bool> PluginConfigCollapsedDefault { get; }
+        public ConfigEntry<LocalizationManager.Language> Language { get;  }
 
         // UI settings
         public ConfigEntry<Color> BackgroundColor { get; }
@@ -48,6 +50,9 @@ namespace ConfigurationManager
 
             PluginConfigCollapsedDefault = config.Bind("General", "Plugin collapsed default", true,
                 new ConfigDescription("If set to true plugins will be collapsed when opening the configuration manager window"));
+
+            Language = config.Bind("General", "Language", LocalizationManager.Language.English);
+            Language.SettingChanged += (obj, args) => LocalizationManager.CurrentLanguage = Language.Value;
 
             BackgroundColor = config.Bind("UI", "Background color", new Color(0f, 0f, 0f, 0.75f));
             FontColor = config.Bind("UI", "Font color", new Color(1f, 1f, 1f, 1f));

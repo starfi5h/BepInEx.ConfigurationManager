@@ -128,7 +128,7 @@ namespace ConfigurationManager
         private static void DrawBoolField(SettingEntryBase setting)
         {
             var boolVal = (bool)setting.Get();
-            var result = GUILayout.Toggle(boolVal, boolVal ? "Enabled" : "Disabled", GUILayout.ExpandWidth(true));
+            var result = GUILayout.Toggle(boolVal, boolVal ? "Enabled".Translate() : "Disabled".Translate(), GUILayout.ExpandWidth(true));
             if (result != boolVal)
                 setting.Set(result);
         }
@@ -311,7 +311,7 @@ namespace ConfigurationManager
         {
             if (_currentKeyboardShortcutToSet == setting)
             {
-                GUILayout.Label("Press any key combination", GUILayout.ExpandWidth(true));
+                GUILayout.Label("Press any key combination".Translate(), GUILayout.ExpandWidth(true));
                 GUIUtility.keyboardControl = -1;
 
                 foreach (var key in _keysToCheck)
@@ -324,7 +324,7 @@ namespace ConfigurationManager
                     }
                 }
 
-                if (GUILayout.Button("Cancel", GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("Cancel".Translate(), GUILayout.ExpandWidth(false)))
                     _currentKeyboardShortcutToSet = null;
             }
             else
@@ -332,7 +332,7 @@ namespace ConfigurationManager
                 if (GUILayout.Button(setting.Get().ToString(), GUILayout.ExpandWidth(true)))
                     _currentKeyboardShortcutToSet = setting;
 
-                if (GUILayout.Button("Clear", GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("Clear".Translate(), GUILayout.ExpandWidth(false)))
                 {
                     setting.Set(BepInEx.Configuration.KeyboardShortcut.Empty);
                     _currentKeyboardShortcutToSet = null;

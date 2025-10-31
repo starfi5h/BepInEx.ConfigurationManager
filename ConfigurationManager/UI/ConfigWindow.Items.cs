@@ -73,7 +73,7 @@ namespace ConfigurationManager.UI
                 if (_settings.ShowDebug)
                 {
                     GUILayout.Space(10);
-                    GUILayout.Label("Plugins with no options available: " + _dataManager.ModsWithoutSettings);
+                    GUILayout.Label("Plugins with no options available: ".Translate() + _dataManager.ModsWithoutSettings);
                 }
                 else
                 {
@@ -89,7 +89,7 @@ namespace ConfigurationManager.UI
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label("Tip: Click plugin names to expand. Click setting and group names to see their descriptions.");
+                GUILayout.Label("Tip: Click plugin names to expand. Click setting names to see their descriptions.".Translate());
             }
             GUILayout.EndHorizontal();
         }
@@ -108,16 +108,16 @@ namespace ConfigurationManager.UI
                 GUILayout.BeginHorizontal();
                 var origColor = GUI.color;
                 GUI.color = Color.gray;
-                if (GUILayout.Button(new GUIContent("Reload", "Trigger Config.Reload() event to apply settings from the config file"), GUI.skin.label, GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button(new GUIContent("Reload".Translate() + "      ", "Trigger Config.Reload() event to apply settings from the config file".Translate()), GUI.skin.label, GUILayout.ExpandWidth(false)))
                     Utils.TryReloadConfig(plugin.Info.GUID);
                 GUI.color = origColor;
 
                 if (SettingFieldDrawer.DrawPluginHeader(categoryHeader, plugin.Collapsed && !isSearching) && !isSearching)
                     plugin.Collapsed = !plugin.Collapsed;
 
-                
+
                 GUI.color = Color.gray;
-                if (GUILayout.Button(new GUIContent("Open", "Open the plugin config file"), GUI.skin.label, GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button(new GUIContent("Open File".Translate(), "Open the plugin config file".Translate()), GUI.skin.label, GUILayout.ExpandWidth(false)))
                     Utils.TryOpenFile(Path.Combine(Paths.ConfigPath, plugin.Info.GUID + ".cfg"));
                 GUI.color = origColor;
                 GUILayout.EndHorizontal();
@@ -159,7 +159,7 @@ namespace ConfigurationManager.UI
                 catch (Exception ex)
                 {
                     ConfigurationManager.Logger.Log(LogLevel.Error, $"Failed to draw setting {setting.DispName} - {ex}");
-                    GUILayout.Label("Failed to draw this field, check log for details.");
+                    GUILayout.Label("Failed to draw this field, check log for details.".Translate());
                 }
             }
             GUILayout.EndHorizontal();
@@ -186,7 +186,7 @@ namespace ConfigurationManager.UI
             bool DefaultButton()
             {
                 GUILayout.Space(5);
-                return GUILayout.Button("Reset", GUILayout.ExpandWidth(false));
+                return GUILayout.Button("Reset".Translate(), GUILayout.ExpandWidth(false));
             }
 
             if (setting.DefaultValue != null)

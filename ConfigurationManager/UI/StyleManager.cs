@@ -75,6 +75,7 @@ namespace ConfigurationManager.UI
             };
 
             CustomSkin = Object.Instantiate(GUI.skin);
+            CustomSkin.toggle.wordWrap = true;
             UpdateCustomSkinFontSize(fontSize);
         }
 

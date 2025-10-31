@@ -118,7 +118,7 @@ namespace ConfigurationManager.UI
 
                 GUI.color = Color.gray;
                 if (GUILayout.Button(new GUIContent("Open File".Translate(), "Open the plugin config file".Translate()), GUI.skin.label, GUILayout.ExpandWidth(false)))
-                    Utils.TryOpenFile(Path.Combine(Paths.ConfigPath, plugin.Info.GUID + ".cfg"));
+                    Utils.TryOpen(Path.Combine(Paths.ConfigPath, plugin.Info.GUID + ".cfg"));
                 GUI.color = origColor;
                 GUILayout.EndHorizontal();
             }

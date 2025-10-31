@@ -75,16 +75,18 @@ namespace ConfigurationManager.Utilities
             return pluginInfo.Instance != null;
         }
 
-        public static bool TryOpenFile(string path)
+        public static bool TryOpen(string path)
         {
-            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return false;
+            if (string.IsNullOrEmpty(path)) return false;
             try
             {
                 Application.OpenURL(path);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                ConfigurationManager.Logger.LogWarning("Exception when trying to load " + path);
+                ConfigurationManager.Logger.LogWarning(ex);
                 return false;
             }
         }
@@ -92,7 +94,7 @@ namespace ConfigurationManager.Utilities
         public static void OpenBepInExLog()
         {
             string logFilePath = Path.Combine(Paths.BepInExRootPath, "LogOutput.log");
-            TryOpenFile(logFilePath);
+            TryOpen(logFilePath);
         }
 
         public static void OpenLog()
@@ -121,7 +123,7 @@ namespace ConfigurationManager.Utilities
             }
 
             var latestLog = candidates.Where(File.Exists).OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
-            if (TryOpenFile(latestLog)) return;
+            if (TryOpen(latestLog)) return;
 
             candidates.Clear();
             // Fall back to more aggresive brute search
@@ -129,7 +131,7 @@ namespace ConfigurationManager.Utilities
             candidates.AddRange(Directory.GetFiles(rootDir, "LogOutput.log*", SearchOption.AllDirectories));
             candidates.AddRange(Directory.GetFiles(rootDir, "output_log.txt", SearchOption.AllDirectories));
             latestLog = candidates.Where(File.Exists).OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
-            if (TryOpenFile(latestLog)) return;
+            if (TryOpen(latestLog)) return;
 
             throw new FileNotFoundException("No log files were found");
         }

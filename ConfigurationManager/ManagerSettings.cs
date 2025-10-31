@@ -41,7 +41,7 @@ namespace ConfigurationManager
             ShowKeybinds = config.Bind("Filtering", "Show keybinds", true);
             ShowSettings = config.Bind("Filtering", "Show settings", true);
 
-            Keybind = config.Bind("General", "Show config manager", new KeyboardShortcut(KeyCode.F1),
+            Keybind = config.Bind("General", "Show config manager", new KeyboardShortcut(KeyCode.F1, KeyCode.LeftControl),
                 new ConfigDescription("The shortcut used to toggle the config manager window on and off.\n" +
                                       "The key can be overridden by a game-specific plugin if necessary, in that case this setting is ignored."));
 

@@ -76,6 +76,15 @@ namespace ConfigurationManager.UI
                     _settings.Language.Value = LocalizationManager.CurrentLanguage;
                 }
 
+                if (GUILayout.Button("Config Folder".Translate(), GUILayout.ExpandWidth(false)))
+                {
+                    try { Utils.TryOpen(BepInEx.Paths.ConfigPath); }
+                    catch (SystemException ex)
+                    {
+                        ConfigurationManager.Logger.Log(LogLevel.Message | LogLevel.Error, ex.Message);
+                    }
+                }
+
                 if (_settings.ShowDebug && GUILayout.Button("Open Unity Log".Translate(), GUILayout.ExpandWidth(false)))
                 {
                     try { Utils.OpenLog(); }

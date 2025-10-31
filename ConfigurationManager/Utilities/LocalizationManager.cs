@@ -48,8 +48,9 @@ namespace ConfigurationManager.Utilities
             ["Clear"] = "清除",
 
             // Buttons
-            ["Open Unity Log"] = "打开 Unity 日志",
-            ["Open BepInEx Log"] = "打开 BepInEx 日志",
+            ["Config Folder"] = "配置文件夹",
+            ["Open Unity Log"] = "打开Unity日志",
+            ["Open BepInEx Log"] = "打开BepInEx日志",
             ["Expand All"] = "全部展开",
             ["Collapse All"] = "全部收起",
 
